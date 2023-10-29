@@ -1,75 +1,89 @@
 import facebook from '../assets/facebook.png';
 import google from '../assets/google.png';
 import apple from '../assets/apple.png';
-import mail from '../assets/mail.png';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import SignInThirdParty from '../components/SignInThirdParty';
+
+// import mail from '../assets/mail.png';
+import { Link, useNavigate } from 'react-router-dom';
+import Input from '../components/Input';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+
+// TODO: 添加Firebase Admin SDK 來驗證 ID token
 
 function Login() {
-  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  // 定義一個點擊處理函式，用來切換 showEmailLogin 的狀態
-  const handleEmailLogin = () => {
-    setShowEmailLogin(!showEmailLogin);
+  const { signInWithEmail, signInWithGoogle, isAuthenticated } = useAuth();
+
+  const handleSignInWithGoogle = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+
   return (
-    <div className='flex justify-center min-h-screen items-center'>
-      {showEmailLogin ? (
-        <div className='flex flex-col justify-center px-3 py-3'>
-          <div className='cursor-pointer' onClick={handleEmailLogin}>
-            返回
+    <div className='flex flex-col lg:flex-row'>
+      <div className='flex basis-1/3 justify-center content-center'>
+        <img
+          className='object-cover width-full h-auto'
+          src='https://www.hdfcergo.com/images/default-source/travel-insurance/budget-shopping-destinations-around-the-world.jpg'
+          alt=''
+        />
+      </div>
+      <div className='flex flex-col basis-2/3 justify-center min-h-screen items-center'>
+        <div className='flex flex-col justify-center px-3 py-3 w-full'>
+          <div className='text-center sm:mb-3 lg:mb-6 sm:mx-auto sm:w-full sm:max-w-sm lg:w-full cursor-pointer text-lg lg:text-3xl'>
+            登入
           </div>
           <div className='sm:mx-auto sm:w-full sm:max-w-sm lg: w-full'>
-            <form className='space-y-6' action='#' method='POST'>
+            <form
+              className='space-y-6'
+              onSubmit={(e) => {
+                e.preventDefault();
+                signInWithEmail();
+              }}
+            >
               <div>
-                <label
-                  htmlFor='email'
-                  className='block text-sm font-medium leading-6 text-gray-900'
+                <Input
+                  id='email'
+                  name='email'
+                  type='email'
+                  value={email}
+                  autoComplete='email'
+                  placeholder='帳號 Email'
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <Input
+                  id='password'
+                  name='password'
+                  type='password'
+                  value={password}
+                  autoComplete='current-password'
+                  placeholder='密碼 Password'
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className='text-xs lg:text-sm'>
+                <a
+                  href='#'
+                  className='font-semibold text-teal-900 hover:text-teal-500 '
                 >
-                  帳號 Email
-                </label>
-                <div className='mt-2'>
-                  <input
-                    id='email'
-                    name='email'
-                    type='email'
-                    autoComplete='email'
-                    required
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                </div>
+                  忘記密碼?
+                </a>
               </div>
-
-              <div>
-                <div className='flex items-center justify-between'>
-                  <label
-                    htmlFor='password'
-                    className='block text-sm font-medium leading-6 text-gray-900'
-                  >
-                    密碼 Password
-                  </label>
-                  <div className='text-sm'>
-                    <a
-                      href='#'
-                      className='font-semibold text-teal-900 hover:text-teal-500'
-                    >
-                      忘記密碼?
-                    </a>
-                  </div>
-                </div>
-                <div className='mt-2'>
-                  <input
-                    id='password'
-                    name='password'
-                    type='password'
-                    autoComplete='current-password'
-                    required
-                    className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6'
-                  />
-                </div>
-              </div>
-
               <div>
                 <button
                   type='submit'
@@ -92,24 +106,40 @@ function Login() {
             </p>
           </div>
         </div>
-      ) : (
         <div>
-          <h1 className='text-center text-2xl p-4 mb-1 '>快速登入</h1>
-          <div className='flex sm:flex-row lg:flex-col gap-4'>
-            <SignInThirdParty image={google} content='使用 Google 帳號登入' />
-            <SignInThirdParty
-              image={facebook}
-              content='使用 Facebook 帳號登入'
-            />
-            <SignInThirdParty image={apple} content='使用 Apple 帳號登入' />
-            <SignInThirdParty
-              image={mail}
-              content=' 使用 電子郵件 登入'
-              onClickAction={handleEmailLogin}
-            />
+          <h1 className='text-center text-xl p-4 mb-1 '>
+            或以下列方式快速登入
+          </h1>
+          <div className='flex flex-row gap-8 justify-center content-center'>
+            <div className='flex flex-col items-center gap-1 cursor-pointer'>
+              <button onClick={handleSignInWithGoogle}>
+                <img
+                  className='rounded-lg w-14 h-14 p-2 ring-2 ring-gray-100'
+                  src={google}
+                  alt='google'
+                />
+              </button>
+              <h4 className='text-gray-600'>Google</h4>
+            </div>
+            <div className='flex flex-col items-center gap-1 cursor-pointer'>
+              <img
+                className='rounded-lg w-14 h-14 p-2 ring-2 ring-gray-100'
+                src={facebook}
+                alt='facebook'
+              />
+              <h4 className='text-gray-600'>Facebook</h4>
+            </div>
+            <div className='flex flex-col items-center gap-1 cursor-pointer'>
+              <img
+                className='rounded-lg w-14 h-14 p-2 ring-2 ring-gray-100'
+                src={apple}
+                alt='apple'
+              />
+              <h4 className='text-gray-600'>Apple</h4>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
