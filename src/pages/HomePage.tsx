@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Navbar from '../components/Navbar';
 // import { checkAuth } from '../auth/auth';
 
 interface User {
   displayName: string;
   email: string;
+  lineID: string;
   emailVerified: boolean;
   phoneNumber: string;
-  photoURL: string;
   uid: string;
 }
 
 const HomePage = () => {
   const { user, setUser } = useAuth();
+  // const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     console.log({ user });
@@ -20,18 +22,14 @@ const HomePage = () => {
       setUser(user);
     } else {
       setUser(null);
-      localStorage.removeItem('token');
+      localStorage.removeItem('idToken');
     }
   }, []);
 
   return (
     <div>
-      <div>
-        <h2>歡迎 {user?.displayName}來到芮芮代購</h2>
-        <div>
-          <img src='' alt='' />
-        </div>
-      </div>
+      <Navbar user={user} />
+      <div className='border-2 border-black border-double'></div>
     </div>
   );
 };
